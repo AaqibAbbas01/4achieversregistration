@@ -16,6 +16,36 @@
 			"isBackground": true,
 			"problemMatcher": [],
 			"group": "build"
+		},
+		{
+			"label": "Test Supabase Connection",
+			"type": "shell",
+			"command": "node scripts/test-conn.js"
+		},
+		{
+			"label": "Install Neon adapter",
+			"type": "shell",
+			"command": "npm uninstall @prisma/adapter-pg pg @types/pg && npm install @neondatabase/serverless @prisma/adapter-neon"
+		},
+		{
+			"label": "Neon Migration",
+			"type": "shell",
+			"command": "npx prisma generate && npx prisma migrate dev --name init 2>&1"
+		},
+		{
+			"label": "Test Neon Connection",
+			"type": "shell",
+			"command": "node scripts/test-conn.js 2>&1"
+		},
+		{
+			"label": "Check Neon Status",
+			"type": "shell",
+			"command": "npx prisma migrate status 2>&1 && echo '---' && node -e \"require('dotenv/config'); const { neon } = require('@neondatabase/serverless'); const sql = neon(process.env.DATABASE_URL); sql('SELECT COUNT(*) as c FROM \\\"Student\\\"').then(r => console.log('Connected! Students:', r[0].c)).catch(e => console.log('FAIL:', e.message));\""
+		},
+		{
+			"label": "Push to GitHub",
+			"type": "shell",
+			"command": "git add -A && git commit -m 'Switch to Neon PostgreSQL - works locally and on Vercel' && git push"
 		}
 	]
 }
