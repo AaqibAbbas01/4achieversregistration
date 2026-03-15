@@ -46,6 +46,138 @@
 			"label": "Push to GitHub",
 			"type": "shell",
 			"command": "git add -A && git commit -m 'Switch to Neon PostgreSQL - works locally and on Vercel' && git push"
+		},
+		{
+			"label": "Dev Server",
+			"type": "shell",
+			"command": "npm run dev",
+			"isBackground": true
+		},
+		{
+			"label": "Test Pages",
+			"type": "shell",
+			"command": "curl -s -o /dev/null -w 'admin: %{http_code}\\n' http://localhost:3000/admin && curl -s -o /dev/null -w 'onboarding: %{http_code}\\n' http://localhost:3000/onboarding"
+		},
+		{
+			"label": "Restart Dev Server",
+			"type": "shell",
+			"command": "pkill -f 'next dev' 2>/dev/null; sleep 1; npm run dev",
+			"isBackground": true
+		},
+		{
+			"label": "Verify Admin Page",
+			"type": "shell",
+			"command": "curl -s http://localhost:3000/admin | grep -o 'Database Connection Error\\|Admin Dashboard\\|4Achievers'"
+		},
+		{
+			"label": "Check Error State",
+			"type": "shell",
+			"command": "curl -s http://localhost:3000/admin | grep -c 'bg-red-50'"
+		},
+		{
+			"label": "Restart Dev Server 2",
+			"type": "shell",
+			"command": "pkill -f 'next dev' 2>/dev/null; sleep 1; npm run dev",
+			"isBackground": true
+		},
+		{
+			"label": "Check Error State 2",
+			"type": "shell",
+			"command": "sleep 2 && curl -s http://localhost:3000/admin | grep -c 'bg-red-50'"
+		},
+		{
+			"label": "Get Error Message",
+			"type": "shell",
+			"command": "curl -s http://localhost:3000/admin | grep -A1 'Database Connection' | head -5"
+		},
+		{
+			"label": "Check Error Detail",
+			"type": "shell",
+			"command": "sleep 3 && curl -s http://localhost:3000/admin | grep -o 'DATABASE_URL.*missing\\|No database host\\|Admin Dashboard – 4Achievers' | head -3"
+		},
+		{
+			"label": "Check Env Files",
+			"type": "shell",
+			"command": "cat .env.local && echo '---' && cat .env | head -2"
+		},
+		{
+			"label": "Final Check",
+			"type": "shell",
+			"command": "sleep 4 && curl -s http://localhost:3000/admin | grep -c 'bg-red-50'"
+		},
+		{
+			"label": "Check Env Load",
+			"type": "shell",
+			"command": "node -e \"require('dotenv/config'); console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'SET' : 'MISSING')\""
+		},
+		{
+			"label": "Restart Dev Final",
+			"type": "shell",
+			"command": "pkill -f 'next dev' 2>/dev/null; sleep 2; npm run dev",
+			"isBackground": true
+		},
+		{
+			"label": "Restart Dev Final 2",
+			"type": "shell",
+			"command": "pkill -f 'next dev' 2>/dev/null; sleep 2; npm run dev",
+			"isBackground": true
+		},
+		{
+			"label": "Final Verify",
+			"type": "shell",
+			"command": "sleep 4 && curl -s http://localhost:3000/admin | grep -c 'bg-red-50'"
+		},
+		{
+			"label": "Clean Restart",
+			"type": "shell",
+			"command": "pkill -f 'next dev' 2>/dev/null; sleep 1; rm -rf .next && npm run dev",
+			"isBackground": true
+		},
+		{
+			"label": "Deep Check",
+			"type": "shell",
+			"command": "sleep 5 && curl -s http://localhost:3000/admin | grep -o 'DATABASE_URL.*not set\\|No database host\\|Total Students\\|Stats'"
+		},
+		{
+			"label": "Extract Error",
+			"type": "shell",
+			"command": "curl -s http://localhost:3000/admin | python3 -c \"import sys,re; html=sys.stdin.read(); m=re.search(r'DATABASE_URL[^<\\\\\\\\\"]{0,200}', html); print(m.group(0) if m else 'not found')\""
+		},
+		{
+			"label": "Check Versions",
+			"type": "shell",
+			"command": "node -e \"console.log('neon:', require('@neondatabase/serverless/package.json').version); console.log('adapter:', require('@prisma/adapter-neon/package.json').version)\""
+		},
+		{
+			"label": "Check Package Versions",
+			"type": "shell",
+			"command": "cat node_modules/@neondatabase/serverless/package.json | python3 -c \"import sys,json; p=json.load(sys.stdin); print('neon version:', p['version'])\" && cat node_modules/@prisma/adapter-neon/package.json | python3 -c \"import sys,json; p=json.load(sys.stdin); print('adapter version:', p['version'])\""
+		},
+		{
+			"label": "Install pg adapter",
+			"type": "shell",
+			"command": "npm install @prisma/adapter-pg pg && npm install --save-dev @types/pg 2>&1 | tail -3"
+		},
+		{
+			"label": "Clean Restart Final",
+			"type": "shell",
+			"command": "pkill -f 'next dev' 2>/dev/null; sleep 1; rm -rf .next && npm run dev",
+			"isBackground": true
+		},
+		{
+			"label": "Final Test",
+			"type": "shell",
+			"command": "sleep 6 && curl -s http://localhost:3000/admin | grep -c 'bg-red-50'"
+		},
+		{
+			"label": "Build Check and Push",
+			"type": "shell",
+			"command": "npx tsc --noEmit 2>&1 && git add -A && git commit -m 'Fix DB: use @prisma/adapter-pg with Neon PostgreSQL URL' && git push"
+		},
+		{
+			"label": "Build and Push",
+			"type": "shell",
+			"command": "npx tsc --noEmit 2>&1 && git add -A && git commit -m 'Fix DB: use @prisma/adapter-pg with Neon PostgreSQL URL' && git push"
 		}
 	]
 }
