@@ -23,9 +23,12 @@ export const metadata = {
 
 export const dynamic = "force-dynamic";
 
+type StudentWithReceipts = Awaited<ReturnType<typeof prisma.student.findMany<{ include: { receipts: true } }>>>[number];
+type ReceiptWithStudent = Awaited<ReturnType<typeof prisma.receipt.findMany<{ include: { student: true } }>>>[number];
+
 export default async function AdminPage() {
-  let students: any[] = [];
-  let receipts: any[] = [];
+  let students: StudentWithReceipts[] = [];
+  let receipts: ReceiptWithStudent[] = [];
   let dbError: string | null = null;
 
   try {
@@ -39,9 +42,9 @@ export default async function AdminPage() {
         orderBy: { createdAt: "desc" },
       }),
     ]);
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("DB Error:", e);
-    dbError = e?.message ?? "Unknown database error";
+    dbError = e instanceof Error ? e.message : "Unknown database error";
   }
 
   if (dbError) {
