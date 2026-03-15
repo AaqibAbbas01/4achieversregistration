@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import {
   formatCurrency,
@@ -10,6 +11,7 @@ import {
   getPaymentModeLabel,
 } from "@/lib/utils";
 import { ReceiptActions } from "@/components/receipt/ReceiptActions";
+import { DeleteReceiptButton } from "@/components/receipt/DeleteReceiptButton";
 import { INSTITUTE } from "@/lib/constants";
 import {
   CheckCircle2,
@@ -17,6 +19,7 @@ import {
   MapPin,
   Globe,
   Mail,
+  Pencil,
 } from "lucide-react";
 
 interface ReceiptPageProps {
@@ -50,11 +53,21 @@ export default async function ReceiptPage({ params }: ReceiptPageProps) {
             <p className="text-sm text-gray-500">Fee Receipt</p>
             <p className="font-semibold text-gray-900">{receipt.id}</p>
           </div>
-          <ReceiptActions
-            receiptId={receipt.id}
-            studentEmail={student.email}
-            emailSent={receipt.emailSent}
-          />
+          <div className="flex items-center gap-2">
+            <ReceiptActions
+              receiptId={receipt.id}
+              studentEmail={student.email}
+              emailSent={receipt.emailSent}
+            />
+            <Link
+              href={`/receipt/${receipt.id}/edit`}
+              className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <Pencil className="w-4 h-4" />
+              Edit
+            </Link>
+            <DeleteReceiptButton receiptId={receipt.id} redirectTo="/admin" />
+          </div>
         </div>
       </div>
 

@@ -7,6 +7,7 @@ import {
 } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { COURSES } from "@/lib/constants";
+import { DeleteReceiptButton } from "@/components/receipt/DeleteReceiptButton";
 import {
   Users,
   Receipt,
@@ -15,6 +16,7 @@ import {
   CheckCircle2,
   Clock,
   Plus,
+  Pencil,
 } from "lucide-react";
 
 export const metadata = {
@@ -257,12 +259,22 @@ export default async function AdminPage() {
                         {formatDateTime(receipt.createdAt)}
                       </td>
                       <td className="px-5 py-3.5">
-                        <a
-                          href={`/receipt/${receipt.id}`}
-                          className="text-xs text-green-600 hover:underline font-medium"
-                        >
-                          View
-                        </a>
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`/receipt/${receipt.id}`}
+                            className="text-xs text-green-600 hover:underline font-medium"
+                          >
+                            View
+                          </a>
+                          <a
+                            href={`/receipt/${receipt.id}/edit`}
+                            className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                            title="Edit receipt"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </a>
+                          <DeleteReceiptButton receiptId={receipt.id} variant="icon" />
+                        </div>
                       </td>
                     </tr>
                   ))}

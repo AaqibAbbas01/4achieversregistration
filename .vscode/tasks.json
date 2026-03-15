@@ -178,6 +178,26 @@
 			"label": "Build and Push",
 			"type": "shell",
 			"command": "npx tsc --noEmit 2>&1 && git add -A && git commit -m 'Fix DB: use @prisma/adapter-pg with Neon PostgreSQL URL' && git push"
+		},
+		{
+			"label": "Build Check",
+			"type": "shell",
+			"command": "npm run build 2>&1 | tail -30"
+		},
+		{
+			"label": "Build Error Detail",
+			"type": "shell",
+			"command": "npm run build 2>&1 | grep -A5 'Type error'"
+		},
+		{
+			"label": "Build Check 2",
+			"type": "shell",
+			"command": "npm run build 2>&1 | tail -20"
+		},
+		{
+			"label": "Push to GitHub",
+			"type": "shell",
+			"command": "git add -A && git commit -m 'Add edit and delete receipt functionality' && git push"
 		}
 	]
 }

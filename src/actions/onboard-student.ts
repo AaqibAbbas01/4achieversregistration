@@ -8,6 +8,7 @@ import type { OnboardingData } from "@/lib/validations";
 import { ReceiptEmail } from "@/components/email/ReceiptEmail";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { ReceiptDocument } from "@/components/receipt/ReceiptDocument";
+import { revalidatePath } from "next/cache";
 import React from "react";
 
 export async function onboardStudent(data: OnboardingData): Promise<{
@@ -202,5 +203,91 @@ export async function resendReceiptEmail(receiptId: string): Promise<{
   } catch (error: unknown) {
     console.error("Resend email error:", error);
     return { success: false, error: error instanceof Error ? error.message : "Failed to send email" };
+  }
+}
+
+export interface UpdateReceiptData {
+  course: string;
+  batchDate: string;
+  mode: string;
+  totalFee: number;
+  amountPaid: number;
+  balanceDue: number;
+  paymentMode: string;
+  transactionId?: string;
+  notes?: string;
+  // student fields
+  name: string;
+  phone: string;
+  address?: string;
+}
+
+export async function updateReceipt(
+  receiptId: string,
+  data: UpdateReceiptData
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const receipt = await prisma.receipt.findUnique({
+      where: { id: receiptId },
+      include: { student: true },
+    });
+    if (!receipt) return { success: false, error: "Receipt not found" };
+
+    await prisma.$transaction([
+      prisma.student.update({
+        where: { id: receipt.studentId },
+        data: {
+          name: data.name,
+          phone: data.phone,
+          address: data.address || null,
+        },
+      }),
+      prisma.receipt.update({
+        where: { id: receiptId },
+        data: {
+          course: data.course,
+          batchDate: data.batchDate,
+          mode: data.mode,
+          totalFee: Number(data.totalFee),
+          amountPaid: Number(data.amountPaid),
+          balanceDue: Number(data.balanceDue),
+          paymentMode: data.paymentMode,
+          transactionId: data.transactionId || null,
+          notes: data.notes || null,
+        },
+      }),
+    ]);
+
+    revalidatePath("/admin");
+    revalidatePath(`/receipt/${receiptId}`);
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Update receipt error:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Failed to update receipt" };
+  }
+}
+
+export async function deleteReceipt(
+  receiptId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const receipt = await prisma.receipt.findUnique({
+      where: { id: receiptId },
+      include: { student: { include: { receipts: true } } },
+    });
+    if (!receipt) return { success: false, error: "Receipt not found" };
+
+    await prisma.receipt.delete({ where: { id: receiptId } });
+
+    // Delete student too if they have no other receipts
+    if (receipt.student.receipts.length === 1) {
+      await prisma.student.delete({ where: { id: receipt.studentId } });
+    }
+
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Delete receipt error:", error);
+    return { success: false, error: error instanceof Error ? error.message : "Failed to delete receipt" };
   }
 }
