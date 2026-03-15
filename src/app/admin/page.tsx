@@ -24,16 +24,36 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const [students, receipts] = await Promise.all([
-    prisma.student.findMany({
-      include: { receipts: true },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.receipt.findMany({
-      include: { student: true },
-      orderBy: { createdAt: "desc" },
-    }),
-  ]);
+  let students: any[] = [];
+  let receipts: any[] = [];
+  let dbError: string | null = null;
+
+  try {
+    [students, receipts] = await Promise.all([
+      prisma.student.findMany({
+        include: { receipts: true },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.receipt.findMany({
+        include: { student: true },
+        orderBy: { createdAt: "desc" },
+      }),
+    ]);
+  } catch (e: any) {
+    console.error("DB Error:", e);
+    dbError = e?.message ?? "Unknown database error";
+  }
+
+  if (dbError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-red-50 p-8">
+        <div className="bg-white rounded-xl border border-red-200 p-8 max-w-2xl w-full">
+          <h1 className="text-xl font-bold text-red-600 mb-2">Database Connection Error</h1>
+          <pre className="text-sm text-gray-700 bg-gray-100 p-4 rounded overflow-auto whitespace-pre-wrap">{dbError}</pre>
+        </div>
+      </div>
+    );
+  }
 
   const totalCollected = receipts.reduce((sum: number, r: { amountPaid: number }) => sum + r.amountPaid, 0);
   const totalBalance = receipts.reduce((sum: number, r: { balanceDue: number }) => sum + r.balanceDue, 0);
